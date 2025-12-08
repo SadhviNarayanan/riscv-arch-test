@@ -10,9 +10,7 @@
 
 
 ##### START_TEST_CONFIG #####
-# implemented_extensions: [I, U, Zicsr]
-# params: 
-#   M_MODE_ENDIANNESS: dynamic
+# REQUIRED_EXTENSIONS: [I, U, Zicsr]
 # MARCH: rv${XLEN}i_zicsr
 # CONFIG_DEPENDENT: true
 ##### END_TEST_CONFIG #####
@@ -35,7 +33,7 @@ RVTEST_BEGIN
     
     //la sp, topofstack
     la sp, scratch
-    
+
     RVMODEL_CLR_MTIMER_INT
 
     csrw mideleg, zero // Ensure MTI is not delegated to S-mode
