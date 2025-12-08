@@ -35,12 +35,10 @@ RVTEST_BEGIN
     
     //la sp, topofstack
     la sp, scratch
-    //jal reset_mtimecmp
+    
     RVMODEL_CLR_MTIMER_INT
 
     csrw mideleg, zero // Ensure MTI is not delegated to S-mode
-
-
     /////////////////////////////////
     // cp_user_mti
     // Undelegated MTI Interrupt

@@ -22,7 +22,7 @@
 
 // Individual cross coverage for each exception type with delegation registers
 
-// Building block coverpoints (similar to ExceptionsM pattern)
+// Building block coverpoints (similar to ExceptionsM pattern) 
 
 `define COVER_EXCEPTIONSH
 covergroup ExceptionsH_exceptions_cg with function sample(ins_t ins);
