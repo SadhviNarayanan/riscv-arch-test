@@ -9,12 +9,6 @@
 ///////////////////////////////////////////
 
 
-
-
-
-
-
-
 ##### START_TEST_CONFIG #####
 # REQUIRED_EXTENSIONS: [I, U, Zicsr]
 # MARCH: rv${XLEN}i_zicsr
