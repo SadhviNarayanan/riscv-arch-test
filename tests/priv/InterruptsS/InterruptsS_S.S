@@ -24,20 +24,14 @@
 
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
-#define rvtest_dtrap_routine
 
 
 #define SIGUPD_COUNT 402
+#define TEST_FILE "InterruptsS_S.S"
 #include "riscv_arch_test.h"
 
 
 
-
-# # Test code region
-# .section .text.init
-# .globl rvtest_entry_point
-# rvtest_entry_point:
-RVMODEL_BOOT
 RVTEST_BEGIN
 
 
@@ -1586,83 +1580,18 @@ RVTEST_BEGIN
        ecall               # system call to finish program
 
 
-   // RVMODEL_IO_WRITE_STR(x30, "# Test part A - test InterruptsS\n");
-
-
-   // RVMODEL_IO_WRITE_STR(x30, "# Test End\n")
-
-
-
-
-# ---------------------------------------------------------------------------------------------
-   # HALT
-
-
-# RVTEST_CODE_END
-# RVMODEL_HALT
-
-
-# RVTEST_DATA_BEGIN
-# # Input data section.
-#     .data
-#     .align 4
-# RVTEST_DATA_END
-
-
-# # Output data section.
-# RVMODEL_DATA_BEGIN
-# rvtest_sig_begin:
-# sig_begin_canary:
-# CANARY;
-
-
-# test_A_res:
-#     .fill 2, 4, 0xdeadbeef
-
-
-# mtrap_sigptr:
-#   .fill 4, 4, 0xdeadbeef
-
-
-# #ifdef rvtest_gpr_save
-# gpr_save:
-#   .fill 32*(XLEN/32), 4, 0xdeadbeef
-# #endif
-
-
-# sig_end_canary:
-# CANARY;
-# rvtest_sig_end:
-# RVMODEL_DATA_END
-
-
-# scratch:
-# .fill 4,4,0x0
-
-
-# # Initialize stack with room for 512 bytes
-# .bss
-#     .space 512
-# topofstack:
-
-
-
 
 // Instantiate trap handlers and other epilog code, call RVMODEL_HALT at end of test
 RVTEST_CODE_END
 
-
 // Create scratch data sections and label for test data
 RVTEST_DATA_BEGIN
 
-
-// Insert test data here
-// @TEST_DATA@ // TODO: Load test data from here instead of using LI
-
+// ANY DATA THAT YOU NEED FOR YOUR TEST GOES HERE, INCLUDING FAILURE STRINGS
+canary_mismatch: .string "Testcase signature canary mismatch!"
 
 // End of test data section and model specific data
 RVTEST_DATA_END
-
 
 // Signature region for self-checking
 RVTEST_SIG_SETUP

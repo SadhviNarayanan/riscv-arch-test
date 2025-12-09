@@ -11,34 +11,21 @@
 
 
 ##### START_TEST_CONFIG #####
-# REQUIRED_EXTENSIONS: [I, S, Zicsr]
+# REQUIRED_EXTENSIONS: [I, Zicsr]
 # MARCH: rv${XLEN}i_zicsr
 # CONFIG_DEPENDENT: true
 ##### END_TEST_CONFIG #####
 
 
 #define rvtest_mtrap_routine
-#define rvtest_strap_routine
-#define rvtest_dtrap_routine
-
-
 
 #define SIGUPD_COUNT 402
+#define TEST_FILE "InterruptsM.S"
 #include "riscv_arch_test.h"
 
 
-
-
-# Test code region
-# .section .text.init
-# .globl rvtest_entry_point
-# rvtest_entry_point:
-RVMODEL_BOOT
-#RVTEST_CODE_BEGIN
 RVTEST_BEGIN
 
-
-# main:
    la sp, scratch
    // jal reset_mtimecmp
    RVMODEL_CLR_MTIMER_INT
@@ -759,7 +746,20 @@ RVTEST_BEGIN
   
 
 
+// Instantiate trap handlers and other epilog code, call RVMODEL_HALT at end of test
+RVTEST_CODE_END
 
+// Create scratch data sections and label for test data
+RVTEST_DATA_BEGIN
+
+// ANY DATA THAT YOU NEED FOR YOUR TEST GOES HERE, INCLUDING FAILURE STRINGS
+canary_mismatch: .string "Testcase signature canary mismatch!"
+
+// End of test data section and model specific data
+RVTEST_DATA_END
+
+// Signature region for self-checking
+RVTEST_SIG_SETUP
 
 
 

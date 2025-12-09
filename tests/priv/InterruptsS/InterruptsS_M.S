@@ -18,25 +18,14 @@
 
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
-#define rvtest_dtrap_routine
-
-
-// # include "model_test.h"
-// # include "arch_test.h"
 
 
 #define SIGUPD_COUNT 402
+#define TEST_FILE "InterruptsS_M.S"
 #include "riscv_arch_test.h"
 
 
-# # Test code region
-# .section .text.init
-# .globl rvtest_entry_point
-# rvtest_entry_point:
-RVMODEL_BOOT
-// RVTEST_CODE_BEGIN
 RVTEST_BEGIN
-
 
    ALL_MEM_PMP                                                             // set the PMP permissions for the whole memory
    csrw satp, zero                                                         // write satp with all zeros (bare mode)
@@ -888,18 +877,14 @@ RVTEST_BEGIN
 // Instantiate trap handlers and other epilog code, call RVMODEL_HALT at end of test
 RVTEST_CODE_END
 
-
 // Create scratch data sections and label for test data
 RVTEST_DATA_BEGIN
 
-
-// Insert test data here
-// @TEST_DATA@ // TODO: Load test data from here instead of using LI
-
+// ANY DATA THAT YOU NEED FOR YOUR TEST GOES HERE, INCLUDING FAILURE STRINGS
+canary_mismatch: .string "Testcase signature canary mismatch!"
 
 // End of test data section and model specific data
 RVTEST_DATA_END
-
 
 // Signature region for self-checking
 RVTEST_SIG_SETUP
