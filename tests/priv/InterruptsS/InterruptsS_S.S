@@ -1276,55 +1276,55 @@ RVTEST_BEGIN
    ///////////////////////////////
 
 
-   # cp_wfi_s:
+   cp_wfi_s:
   
-   #     li a0, 15                       # use a0 as bitfield
-   #     RVTEST_GOTO_MMODE               # start test in M-mode to control CSRs
+       li a0, 15                       # use a0 as bitfield
+       RVTEST_GOTO_MMODE               # start test in M-mode to control CSRs
 
 
-   #     1:
-   #     li t1, 8
-   #     csrrc t6, mstatus, t1
-   #     andi t0, a0, 8
-   #     beqz t0, 2f                     # use bit 3 to toggle mstatus.MIE
-   #     csrrs t6, mstatus, t1
+       1:
+       li t1, 8
+       csrrc t6, mstatus, t1
+       andi t0, a0, 8
+       beqz t0, 2f                     # use bit 3 to toggle mstatus.MIE
+       csrrs t6, mstatus, t1
       
-   #     2:
-   #     li t1, 2
-   #     csrrc t6, mstatus, t1
-   #     andi t0, a0, 4
-   #     beqz t0, 3f                     # use bit 2 to toggle mstatus.SIE
-   #     csrrs t6, mstatus, t1
+       2:
+       li t1, 2
+       csrrc t6, mstatus, t1
+       andi t0, a0, 4
+       beqz t0, 3f                     # use bit 2 to toggle mstatus.SIE
+       csrrs t6, mstatus, t1
       
-   #     3:
-   #     li t1, -1
-   #     csrrc t6, mideleg, t1
-   #     andi t0, a0, 2
-   #     beqz t0, 4f                     # use bit 1 to toggle mideleg = 0s/1s
-   #     csrrs t6, mideleg, t1
+       3:
+       li t1, -1
+       csrrc t6, mideleg, t1
+       andi t0, a0, 2
+       beqz t0, 4f                     # use bit 1 to toggle mideleg = 0s/1s
+       csrrs t6, mideleg, t1
 
 
-   #     4:
-   #     li t1, 1
-   #     slli t1, t1, 21
-   #     csrrc t6, mstatus, t1
-   #     andi t0, a0, 1
-   #     beqz t0, 5f                     # use bit 0 to toggle mstatus.TW
-   #     csrrs t6, mstatus, t1
+       4:
+       li t1, 1
+       slli t1, t1, 21
+       csrrc t6, mstatus, t1
+       andi t0, a0, 1
+       beqz t0, 5f                     # use bit 0 to toggle mstatus.TW
+       csrrs t6, mstatus, t1
 
 
-   #     5:
-   #     li t0, 128
-   #     csrrw t6, mie, t0               # enable machine timer interrupts
-   #     //jal cause_mtimer_interrupt_soon # set up mtimecmp to interrupt in 256 cycles
-   #     RVMODEL_CAUSE_MTIMER_INT_SOON
-   #     RVTEST_GOTO_LOWER_MODE Smode    # enter supervisor mode
-   #     nop
-   #     wfi                             # wait for interrupt
-   #     nop
-   #     RVTEST_GOTO_MMODE               # return to M-mode and clean up for next test
-   #     addi a0, a0, -1                 # decrement bitfield counter
-   #     bgez a0, 1b                     # loop back to next case
+       5:
+       li t0, 128
+       csrrw t6, mie, t0               # enable machine timer interrupts
+       //jal cause_mtimer_interrupt_soon # set up mtimecmp to interrupt in 256 cycles
+       RVMODEL_CAUSE_MTIMER_INT_SOON
+       RVTEST_GOTO_LOWER_MODE Smode    # enter supervisor mode
+       nop
+       wfi                             # wait for interrupt
+       nop
+       RVTEST_GOTO_MMODE               # return to M-mode and clean up for next test
+       addi a0, a0, -1                 # decrement bitfield counter
+       bgez a0, 1b                     # loop back to next case
 
 
    // TODO: I am also commenting this out
@@ -1342,65 +1342,65 @@ RVTEST_BEGIN
    ///////////////////////////////
 
 
-   # cp_wfi_timeout_s:
+   cp_wfi_timeout_s:
   
-   #     li a0, 16           # use a0 as bitfield
-   #     li a1, 3            # use a3 as index variable for priv mode
-   #     RVTEST_GOTO_MMODE   # start test in M-mode to control CSRs
+       li a0, 16           # use a0 as bitfield
+       li a1, 3            # use a3 as index variable for priv mode
+       RVTEST_GOTO_MMODE   # start test in M-mode to control CSRs
 
 
-   #     1:
-   #     addi a0, a0, -1
-   #     li t0, 8
-   #     csrrc t6, mstatus, t0
-   #     andi t0, a0, 8
-   #     beqz t0, 2f                         # use bit 3 to toggle mstatus.MIE
-   #     li t0, 8
-   #     csrrs t6, mstatus, t0
+       1:
+       addi a0, a0, -1
+       li t0, 8
+       csrrc t6, mstatus, t0
+       andi t0, a0, 8
+       beqz t0, 2f                         # use bit 3 to toggle mstatus.MIE
+       li t0, 8
+       csrrs t6, mstatus, t0
       
-   #     2:
-   #     li t0, 2
-   #     csrrc t6, mstatus, t0
-   #     andi t0, a0, 4
-   #     beqz t0, 3f                         # use bit 2 to toggle mstatus.SIE
-   #     li t0, 2
-   #     csrrs t6, mstatus, t0
+       2:
+       li t0, 2
+       csrrc t6, mstatus, t0
+       andi t0, a0, 4
+       beqz t0, 3f                         # use bit 2 to toggle mstatus.SIE
+       li t0, 2
+       csrrs t6, mstatus, t0
       
-   #     3:
-   #     li t1, -1
-   #     csrrc t6, mideleg, t1
-   #     andi t0, a0, 2
-   #     beqz t0, 4f                         # use bit 1 to toggle mideleg = 0s/1s
-   #     csrrs t6, mideleg, t1
+       3:
+       li t1, -1
+       csrrc t6, mideleg, t1
+       andi t0, a0, 2
+       beqz t0, 4f                         # use bit 1 to toggle mideleg = 0s/1s
+       csrrs t6, mideleg, t1
 
 
-   #     4:
-   #     li t1, 128
-   #     csrrc t6, mie, t1
-   #     andi t0, a0, 1
-   #     beqz t0, 5f                         # use bit 0 to toggle mie.MTIE
-   #     csrrs t6, mie, t1
+       4:
+       li t1, 128
+       csrrc t6, mie, t1
+       andi t0, a0, 1
+       beqz t0, 5f                         # use bit 0 to toggle mie.MTIE
+       csrrs t6, mie, t1
 
 
-   #     5:
-   #     li t1, 1
-   #     slli t1, t1, 21
-   #     csrrc t6, mstatus, t1               # always use mstatus.TW = 1
-   #     //jal reset_mtimecmp                  # set mtimecmp = MAX so timer interrupt will never trigger
-   #     RVMODEL_CLR_MTIMER_INT
+       5:
+       li t1, 1
+       slli t1, t1, 21
+       csrrc t6, mstatus, t1               # always use mstatus.TW = 1
+       //jal reset_mtimecmp                  # set mtimecmp = MAX so timer interrupt will never trigger
+       RVMODEL_CLR_MTIMER_INT
 
 
-   #     RVTEST_GOTO_LOWER_MODE Smode        # run wfi in S-mode by default
-   #     addi a1, a1, -1
-   #     li t0, 1
-   #     bne a1, t0, 6f                      # if a1 = 1, run in U-mode instead
-   #     RVTEST_GOTO_LOWER_MODE Umode
+       RVTEST_GOTO_LOWER_MODE Smode        # run wfi in S-mode by default
+       addi a1, a1, -1
+       li t0, 1
+       bne a1, t0, 6f                      # if a1 = 1, run in U-mode instead
+       RVTEST_GOTO_LOWER_MODE Umode
 
 
-   #     6:
-   #     wfi                 # wfi instruction, expect timeout trap
-   #     RVTEST_GOTO_MMODE   # go back to M-mode after test cases to allow access to CSRs
-   #     bnez a0, 1b         # loop to next case
+       6:
+       wfi                 # wfi instruction, expect timeout trap
+       RVTEST_GOTO_MMODE   # go back to M-mode after test cases to allow access to CSRs
+       bnez a0, 1b         # loop to next case
 
 
    j test_end
