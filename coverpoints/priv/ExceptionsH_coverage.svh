@@ -148,11 +148,6 @@ covergroup ExceptionsH_exceptions_cg with function sample(ins_t ins);
    // ============================================================================
    // PRIVILEGE MODE COVERPOINTS
    // ============================================================================
-   mode_virt_cp: coverpoint mode_virt {
-       bins zero = {0};
-       bins one  = {1};
-   }
-
 
    // All 5 privilege modes (M/HS/VS/VU/U)
    modes: coverpoint {ins.prev.mode_virt, ins.prev.mode} {
@@ -171,14 +166,14 @@ covergroup ExceptionsH_exceptions_cg with function sample(ins_t ins);
 
 
    // Previous modes for delegation to HS (U, VS, VU)
-   priv_mode_to_hs: coverpoint {ins.prev.mode_virt, mode_virt} {
+   priv_mode_to_hs: coverpoint {ins.prev.mode_virt, ins.prev.mode} {
        bins U_mode  = {3'b000};
        bins VS_mode = {3'b101};
        bins VU_mode = {3'b100};
    }
 
    // Previous modes for delegation to M (all 5 modes)
-   priv_mode_to_m: coverpoint {ins.prev.mode_virt, mode_virt} {
+   priv_mode_to_m: coverpoint {ins.prev.mode_virt, ins.prev.mode} {
        bins M_mode  = {3'b?11};
        bins HS_mode = {3'b001};
        bins U_mode  = {3'b000};
@@ -188,12 +183,12 @@ covergroup ExceptionsH_exceptions_cg with function sample(ins_t ins);
 
 
    // Previous modes for VS (VU and VS)
-   priv_mode_to_vs: coverpoint {ins.prev.mode_virt, mode_virt} {
+   priv_mode_to_vs: coverpoint {ins.prev.mode_virt, ins.prev.mode} {
        bins VU_mode = {3'b100};
    }
 
    // VS-mode only (for virtual instruction exceptions)
-   priv_mode_vs: coverpoint {ins.prev.mode_virt, mode_virt} {
+   priv_mode_vs: coverpoint {ins.prev.mode_virt, ins.prev.mode} {
        bins VS_mode = {3'b101};
    }
 
