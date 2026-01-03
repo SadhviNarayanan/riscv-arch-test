@@ -121,6 +121,24 @@
   addi _DATA_PTR, _DATA_PTR, SIG_STRIDE
 
 
+// RVTEST_FP_ENABLE enables the floating-point unit
+// - Sets mstatus.fs to INITIAL
+// - Clears fcsr
+#define RVTEST_FP_ENABLE(HELPER_GPR)                 \
+  LI(HELPER_GPR, (MSTATUS_FS & (MSTATUS_FS >> 1)))  ;\
+  csrs mstatus, HELPER_GPR                          ;\
+  csrwi fcsr, 0
+
+// RVTEST_V_ENABLE enables the vector unit
+// Perform the following steps:
+// - Set mstatus.vs to INITIAL
+// - Read out vlenb and store in VLENB_CACHE
+#define RVTEST_V_ENABLE(VLENB_CACHE, HELPER_GPR)       \
+    LI(HELPER_GPR, (MSTATUS_VS & (MSTATUS_VS >> 1)))  ;\
+    csrs mstatus, HELPER_GPR                          ;\
+    csrr VLENB_CACHE, vlenb
+
+
 /* TODO: Add support for Zfinx
 #if ZFINX==1
     #define FLREG ld
@@ -286,3 +304,46 @@
         LI(     dst, imm)               ;\
         addi    dst, src, dst           ;\
 .endif
+
+// CSR Macros
+// each access is followed by a nop in case the access causes a trap
+// because the trap return skips the next instruction
+
+#define CSRRW(_R2, _CSR, _R1) \
+    csrrw _R2, _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+#define CSRRS(_R2, _CSR, _R1) \
+    csrrs _R2, _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+#define CSRRC(_R2, _CSR, _R1) \
+    csrrc _R2, _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+#define CSRR(_R2, _CSR) \
+    csrr _R2, _CSR      ;\
+    nop      # in case csr op traps
+
+#define CSRW(_CSR, _R1) \
+    csrw _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+#define CSRS(_CSR, _R1) \
+    csrs _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+#define CSRC(_CSR, _R1) \
+    csrc _CSR, _R1      ;\
+    nop      # in case csr op traps
+
+
+
+// Utility Macros
+
+// Place 1 in msb
+#define SET_MSB(_R) \
+    li _R, 0x80000000       /* 1 in bit 31   */                  ;\
+    #if __riscv_xlen == 64                                       ;\
+        slli _R, _R, 32     /* shift _R to have 1 in bit 63  */  ;\
+    #endif

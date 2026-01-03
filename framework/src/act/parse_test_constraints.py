@@ -39,6 +39,11 @@ class TestMetadata(BaseModel):
         """Get floating-point register length: '64' if D extension present, else '32'."""
         return "128" if "Q" in self.required_extensions else "64" if "D" in self.required_extensions else "32"
 
+    @property
+    def e_test(self) -> bool:
+        """Check if E extension is present."""
+        return self.march.startswith(("rv32e", "rv64e", "rv${XLEN}e"))
+
 
 def extract_yaml_config(file: Path) -> TestMetadata:
     """Extract YAML configuration from a test file between START_TEST_CONFIG and END_TEST_CONFIG markers."""
@@ -72,16 +77,28 @@ def extract_yaml_config(file: Path) -> TestMetadata:
     return TestMetadata.model_validate(config_dict)
 
 
-def generate_test_dict(tests_dir: Path) -> dict[str, TestMetadata]:
+def generate_test_dict(tests_dir: Path, extensions: str) -> dict[str, TestMetadata]:
     """Generate a dictionary of tests with their corresponding metadata from the specified directory."""
     if not tests_dir.is_dir():
         raise ValueError(f"tests_dir is not a directory: {tests_dir}")
 
+    extension_list: list[str] = []
+    if extensions != "all":
+        for ext in extensions.split(","):
+            extension_list.append(ext.strip())
+
     test_list: dict[str, TestMetadata] = {}
 
-    for test_file in tests_dir.rglob("*.S"):
-        config = extract_yaml_config(test_file)
-        test_file_unique_name = str(test_file.relative_to(tests_dir))
-        test_list[test_file_unique_name] = config
+    if extension_list:
+        for ext in extension_list:
+            for test_file in tests_dir.rglob(f"*/{ext}/*.S"):
+                config = extract_yaml_config(test_file)
+                test_file_unique_name = str(test_file.relative_to(tests_dir))
+                test_list[test_file_unique_name] = config
+    else:
+        for test_file in tests_dir.rglob("*.S"):
+            config = extract_yaml_config(test_file)
+            test_file_unique_name = str(test_file.relative_to(tests_dir))
+            test_list[test_file_unique_name] = config
 
     return test_list

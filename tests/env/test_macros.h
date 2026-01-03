@@ -1,4 +1,6 @@
-/* This function set up the Page table entry for Sv32 Translation scheme
+// Page Table Macros
+
+/* Set up the Page table entry for Sv32 Translation scheme
     Arguments:
     _PAR: Register containing Physical Address
     _PR: Register containing Permissions for Leaf PTE.
@@ -192,10 +194,3 @@
     srli t6, t6, 12                                             ;\
     or t6, t6, t5                                               ;\
     csrw satp, t6                                               ;
-
-// RVTEST_FP_ENABLE() enables floating point by setting the FS field in
-// mstatus to Initial (01) and clearing the fcsr register.
-#define RVTEST_FP_ENABLE()                  ;\
-  LI(a0, (MSTATUS_FS & (MSTATUS_FS >> 1)))  ;\
-  csrs mstatus, a0                          ;\
-  csrwi fcsr, 0

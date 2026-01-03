@@ -160,6 +160,22 @@
   #endif
 #endif
 
+
+
+// RVTEST_SIGUPD_V(_SIG_PTR, _TMP, AVL, SEW, VREG)
+//  _SIG_PTR  - Base register for signature region
+//  _TEMP_REG - Temporary int register to use for loading signature
+//   AVL       - Application vector length (immediate constant)
+//   SEW       - Element width in bits (8, 16, 32, or 64)
+//   VREG      - Vector register containing data
+// TODO: implement SELFCHECK version
+#define RVTEST_SIGUPD_V(_SIG_PTR, _TEMP_REG, SEW, OFFSET, VREG)      \
+  vse ## SEW ##.v VREG, (_SIG_BASE)                           ;\
+  nop                                                         ;\
+  nop                                                         ;\
+  addi _SIG_PTR, _SIG_PTR, OFFSET
+
+
 // Canary value to indicate bounds of signature region
 #if SIG_STRIDE==8
   #define CANARY_VALUE \
@@ -172,3 +188,22 @@
   #define CANARY \
       .word CANARY_VALUE
 #endif
+
+// Read _CSR into _R and record/check the signature
+#define RVTEST_SIGUPD_CSR_RD(_SIG_PTR, _LINK_REG, _TEMP_REG, _CSR, _R, _STR_PTR) \
+    CSRR(_R, _CSR)                                       ;\
+    RVTEST_SIGUPD(_SIG_PTR, _LINK_REG, _TEMP_REG, _R, _STR_PTR)
+
+// Abbreviated form with default registers
+#define RVTEST_SIGUPD_CSR_READ(_CSR, _R, _STR_PTR) \
+    RVTEST_SIGUPD_CSR_RD(DEFAULT_SIG_REG, DEFAULT_LINK_REG, DEFAULT_TEMP_REG, _CSR, _R, _STR_PTR)
+
+
+// Write _R1 into _CSR, then read back into _R2 and record/check the signature
+#define RVTEST_SIGUPD_CSR_WR(_SIG_PTR, _LINK_REG, _TEMP_REG, _CSR, _R1, _R2, _STR_PTR) \
+    CSRW(_CSR, _R1)                                      ;\
+    RVTEST_SIGUPD_CSR_RD(_SIG_PTR, _LINK_REG, _TEMP_REG, _CSR, _R2, _STR_PTR)
+
+// Abbreviated form with default registers, overwrites _R with value read back
+#define RVTEST_SIGUPD_CSR_WRITE(_CSR, _R, _STR_PTR) \
+    RVTEST_SIGUPD_CSR_WR(DEFAULT_SIG_REG, DEFAULT_LINK_REG, DEFAULT_TEMP_REG, _CSR, _R, _R, _STR_PTR)

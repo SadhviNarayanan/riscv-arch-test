@@ -12,7 +12,7 @@
 // Use csrrw/csrrs/csrrc t6, csr, rs1    when modifying a CSR to also check the old value.
 
 ##### START_TEST_CONFIG #####
-# REQUIRED_EXTENSIONS: [I, S, Zicsr]
+# REQUIRED_EXTENSIONS: [I, S, Zicsr, Sm]
 # MARCH: rv${XLEN}i_zicsr
 # CONFIG_DEPENDENT: true
 ##### END_TEST_CONFIG #####
@@ -195,12 +195,15 @@ cp_sprivinst:
     ebreak       # take a trap, and the trap handler returns
 
 /////////////////////////////////
-// cp_mret
+// cp_mret_s
 /////////////////////////////////
-cp_mret:
+cp_mret_s:
 // Executing mret in supervisor mode
 // Should throw an illegal instruction exception
     mret
+
+// *** cp_mret_m and cp_sret_m are not implemented yet and thus are missing coverage.
+// *** create these when moving to Python generator
 
 /////////////////////////////////
 // cp_shadow
