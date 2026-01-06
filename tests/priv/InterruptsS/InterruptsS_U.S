@@ -22,6 +22,7 @@
 
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
+#define rvtest_dtrap_routine
 
 
 
