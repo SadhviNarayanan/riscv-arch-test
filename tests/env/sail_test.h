@@ -6,6 +6,22 @@
 #ifndef _COMPLIANCE_MODEL_H
 #define _COMPLIANCE_MODEL_H
 
+#define CLINT_BASE_ADDR 0x02000000
+#define PLIC_BASE_ADDR 0x0C000000
+#define GPIO_BASE_ADDR 0x10060000
+#define MTIME           (CLINT_BASE_ADDR + 0xBFF8)
+#define MSIP            (CLINT_BASE_ADDR)
+#define MTIMECMP        (CLINT_BASE_ADDR + 0x4000)
+#define MTIMECMPH       (CLINT_BASE_ADDR + 0x4004)
+#define THRESHOLD_0     (PLIC_BASE_ADDR + 0x200000)
+#define THRESHOLD_1     (PLIC_BASE_ADDR + 0x201000)
+#define INT_PRIORITY_3  (PLIC_BASE_ADDR + 0x00000C)
+#define INT_EN_00       (PLIC_BASE_ADDR + 0x002000)
+#define INT_EN_10       (PLIC_BASE_ADDR + 0x002080)
+#define GPIO_OUTPUT_EN  (GPIO_BASE_ADDR + 0x08)
+#define GPIO_OUTPUT_VAL (GPIO_BASE_ADDR + 0x0C)
+
+
 #define RVMODEL_DATA_SECTION \
         .pushsection .tohost,"aw",@progbits;                \
         .align 8; .global tohost; tohost: .dword 0;         \
