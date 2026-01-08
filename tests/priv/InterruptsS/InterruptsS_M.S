@@ -22,7 +22,6 @@
 
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
-#define rvtest_dtrap_routine
 
 
 
@@ -37,7 +36,6 @@
 RVTEST_BEGIN
 
 
-  ALL_MEM_PMP                                                             // set the PMP permissions for the whole memory
   csrw satp, zero                                                         // write satp with all zeros (bare mode)
 
 

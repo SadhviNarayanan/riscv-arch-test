@@ -22,13 +22,10 @@
 
 
 #define rvtest_mtrap_routine
-#define rvtest_dtrap_routine
-
 
 #define SIGUPD_COUNT 402
 #define TEST_FILE "InterruptsM.S"
 #include "riscv_arch_test.h"
-
 
 
 

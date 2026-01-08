@@ -222,12 +222,7 @@ li t2, 0x2000000;                 \
 sw t1, 0(t2);
 
 
-// #define RVMODEL_CLR_MSW_INT
-#define RVMODEL_CLR_MSW_INT
-la t0, CLINT_BASE_ADDR; \
-SREG zero, 0(t0);
-// li t2, 0x2000000;                 \
-// sw x0, 0(t2);
+
 
 
 
@@ -250,7 +245,6 @@ csrrci t6, mip, 2;
 li t0, 32; \
 csrrc t6, mip, t0;
 ////// FLOATING ///////
-
 
 
 
@@ -309,7 +303,9 @@ sw zero, 0x30(t0);
 #define RVMODEL_SET_STIMER_INT
 
 
-#define RVMODEL_CLR_STIMER_INT
+#define RVMODEL_CLR_STIMER_INT \
+li t0, 32; \
+csrrc t6, mip, t0;
 
 
 #define RVMODEL_SET_STIMER_INT_SOON

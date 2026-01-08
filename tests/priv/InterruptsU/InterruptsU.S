@@ -39,7 +39,6 @@
 RVTEST_BEGIN
 
 
- ALL_MEM_PMP // set the PMP permissions for the whole memory
  csrw satp, zero // write satp with all zeros (bare mode)
   //la sp, topofstack
  la sp, scratch

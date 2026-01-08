@@ -101,7 +101,7 @@ def gen_compile_targets(
         f"\n"
         # Objdump (only if debug and objdump_exe is set)
         f"{
-            f'\n\t{config.objdump_exe} -Sd -M no-aliases,numeric \\\n\t\t{sig_elf} \\\n\t\t> {sig_elf}.objdump\n'
+            f'\n\t{config.objdump_exe} -Sstxd -M no-aliases,numeric \\\n\t\t{sig_elf} \\\n\t\t> {sig_elf}.objdump\n'
             if debug and config.objdump_exe is not None
             else '# skipping objdump generation\n'
         }"
@@ -127,7 +127,7 @@ def gen_compile_targets(
         f"\t\t{test_path}\n"
         # Objdump (objdump_exe is set)
         f"{
-            f'\n\t{config.objdump_exe} -Sd -M no-aliases,numeric \\\n\t\t{final_elf} \\\n\t\t> {final_elf}.objdump\n'
+            f'\n\t{config.objdump_exe} -Sstxd -M no-aliases,numeric \\\n\t\t{final_elf} \\\n\t\t> {final_elf}.objdump\n'
             if config.objdump_exe is not None
             else '# skipping objdump generation\n'
         }"
