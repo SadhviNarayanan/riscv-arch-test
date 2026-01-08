@@ -8,52 +8,26 @@
 // SPDX-License-Identifier: Apache-2.0 WITH SHL-2.1
 ///////////////////////////////////////////
 
-
-
-
 ##### START_TEST_CONFIG #####
 # REQUIRED_EXTENSIONS: [I, S, Zicsr]
 # MARCH: rv${XLEN}i_zicsr
 # CONFIG_DEPENDENT: true
 ##### END_TEST_CONFIG #####
 
-
-
-
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
-
-
-
 
 #define SIGUPD_COUNT 402
 #define TEST_FILE "InterruptsS_U.S"
 #include "riscv_arch_test.h"
 
 
-
-
-
-
 RVTEST_BEGIN
-
-
-
-
   csrw satp, zero                                                         // write satp with all zeros (bare mode)
-
-
-  //la sp, topofstack
   la sp, scratch
-  //jal reset_mtimecmp
   RVMODEL_CLR_MTIMER_INT
 
-
-
-
   RVTEST_GOTO_LOWER_MODE Smode
-
-
 
 
   ///////////////////////////////
@@ -63,18 +37,9 @@ RVTEST_BEGIN
   // stvec.MODE={00/01}, mideleg.MTI = {0/1}, mie.MTIE = 1,
   // set MTIMECMP to trigger interrupt
   ///////////////////////////////
-
-
-
-
   cp_user_mti:
-
-
       li a0, 16           # use a0 as bitfield
       RVTEST_GOTO_MMODE   # start test in M-mode to set CSRs
-
-
-
 
       1:
       addi a0, a0, -1
@@ -83,17 +48,11 @@ RVTEST_BEGIN
       bnez t0, 2f             # set mstatus.MIE with bit 3 of a0
       csrrsi t6, mstatus, 8
 
-
-
-
       2:
       andi t0, a0, 4
       csrrci t6, mstatus, 2
       bnez t0, 3f             # set mstatus.SIE with bit 2 of a0
       csrrsi t6, mstatus, 2
-
-
-
 
       3:
       andi t0, a0, 2
@@ -101,18 +60,12 @@ RVTEST_BEGIN
       bnez t0, 4f             # set stvec.MODE[0] with bit 1 of a0
       csrrsi t6, stvec, 1
 
-
-
-
       4:
       andi t0, a0, 1
       li t1, 128
       csrrc t6, mideleg, t1
       bnez t0, 5f             # set mideleg.MTI with bit 0 of a0
       csrrs t6, mideleg, t1
-
-
-
 
       5:
       li t1, 128
@@ -136,18 +89,9 @@ RVTEST_BEGIN
   // stvec.MODE={00/01}, mideleg.MSI = {0/1}, mie.MSIE = 1,
   // set CLINT.MSIP to trigger interrupt
   ///////////////////////////////
-
-
-
-
   cp_user_msi:
-
-
       li a0, 16           # use a0 as bitfield
       RVTEST_GOTO_MMODE   # start test in M-mode to set CSRs
-
-
-
 
       1:
       addi a0, a0, -1
@@ -156,17 +100,11 @@ RVTEST_BEGIN
       bnez t0, 2f             # set mstatus.MIE with bit 3 of a0
       csrrsi t6, mstatus, 8
 
-
-
-
       2:
       andi t0, a0, 4
       csrrci t6, mstatus, 2
       bnez t0, 3f             # set mstatus.SIE with bit 2 of a0
       csrrsi t6, mstatus, 2
-
-
-
 
       3:
       andi t0, a0, 2
@@ -174,17 +112,11 @@ RVTEST_BEGIN
       bnez t0, 4f             # set stvec.MODE[0] with bit 1 of a0
       csrrsi t6, stvec, 1
 
-
-
-
       4:
       andi t0, a0, 1
       csrrci t6, mideleg, 8
       bnez t0, 5f             # set mideleg.MSI with bit 0 of a0
       csrrsi t6, mideleg, 8
-
-
-
 
       5:
       csrrsi t6, mie, 8       # set mie.MSIE = 1
@@ -200,7 +132,6 @@ RVTEST_BEGIN
 
 
 
-
   ///////////////////////////////
   // cp_user_mei
   //
@@ -208,18 +139,9 @@ RVTEST_BEGIN
   // stvec.MODE={00/01}, mideleg.MEI = {0/1}, mie.MEIE = 1,
   // set PLIC to trigger ME interrupt
   ///////////////////////////////
-
-
-
-
   cp_user_mei:
-
-
       li a0, 16           # use a0 as bitfield
       RVTEST_GOTO_MMODE   # start test in M-mode to set CSRs
-
-
-
 
       1:
       addi a0, a0, -1
@@ -228,17 +150,11 @@ RVTEST_BEGIN
       bnez t0, 2f             # set mstatus.MIE with bit 3 of a0
       csrrsi t6, mstatus, 8
 
-
-
-
       2:
       andi t0, a0, 4
       csrrci t6, mstatus, 2
       bnez t0, 3f             # set mstatus.SIE with bit 2 of a0
       csrrsi t6, mstatus, 2
-
-
-
 
       3:
       andi t0, a0, 2
@@ -246,18 +162,12 @@ RVTEST_BEGIN
       bnez t0, 4f             # set stvec.MODE[0] with bit 1 of a0
       csrrsi t6, stvec, 1
 
-
-
-
       4:
       andi t0, a0, 1
       li t1, 2048
       csrrc t6, mideleg, t1
       bnez t0, 5f             # set mideleg.MSI with bit 0 of a0
       csrrs t6, mideleg, t1
-
-
-
 
       5:
       li t1, 2048
@@ -273,7 +183,6 @@ RVTEST_BEGIN
 
 
 
-
   ///////////////////////////////
   // cp_user_sei
   //
@@ -281,18 +190,9 @@ RVTEST_BEGIN
   // stvec.MODE={00/01}, mideleg.SEI = {0/1}, mie.SEIE = 1,
   // set PLIC to trigger SE interrupt
   ///////////////////////////////
-
-
-
-
   cp_user_sei:
-
-
       li a0, 16           # use a0 as bitfield
       RVTEST_GOTO_MMODE   # start test in M-mode to set CSRs
-
-
-
 
       1:
       addi a0, a0, -1
@@ -301,17 +201,11 @@ RVTEST_BEGIN
       bnez t0, 2f             # set mstatus.MIE with bit 3 of a0
       csrrsi t6, mstatus, 8
 
-
-
-
       2:
       andi t0, a0, 4
       csrrci t6, mstatus, 2
       bnez t0, 3f             # set mstatus.SIE with bit 2 of a0
       csrrsi t6, mstatus, 2
-
-
-
 
       3:
       andi t0, a0, 2
@@ -319,18 +213,12 @@ RVTEST_BEGIN
       bnez t0, 4f             # set stvec.MODE[0] with bit 1 of a0
       csrrsi t6, stvec, 1
 
-
-
-
       4:
       andi t0, a0, 1
       li t1, 512
       csrrc t6, mideleg, t1
       bnez t0, 5f             # set mideleg.MSI with bit 0 of a0
       csrrs t6, mideleg, t1
-
-
-
 
       5:
       li t1, 512
@@ -345,12 +233,7 @@ RVTEST_BEGIN
       bnez a0, 1b                     # loop to next case
 
 
-
-
   j test_end
-
-
-
 
 
 
@@ -361,32 +244,19 @@ RVTEST_BEGIN
       li s1, 5                # iterate through setting mie.M/SEIE, M/SSIE, or M/STIE (5-0)
       li t1, -1
 
-
-
-
       addi sp, sp, -8
       SREG ra, 0(sp)
 
-
-
-
       for_mie:
-
-
           slli t3, s1, 1      # setting mie.M/SEIE, M/SSIE, or M/STIE based on s1 value
           li t4, 2
           sll t4, t4, t3
           csrrw t6, mie, t4   # set enable for interrupt type of interest, clear all others
 
-
           jal raise_interrupts_s
-
 
           addi s1, s1, -1
           bge s1, zero, for_mie # iterate through interrupt types to be enabled
-
-
-
 
       LREG ra, 0(sp)
       addi sp, sp, 8
@@ -399,30 +269,14 @@ RVTEST_BEGIN
 
   raise_interrupts_s:
       // raises each of mip.M/SEIP/M/SSIP/M/STIP once in sequence
-
-
-
-
       addi sp, sp, -8
       SREG ra, 0(sp)
 
-
-
-
       li s2, 5
 
-
-
-
       for_mip:
-
-
           # based on s2 value, attempt to trigger one of M/SEIP, M/SSIP, or M/STIP
           # includes resets in case interrupt is not triggered
-
-
-
-
           case5_vectored:
               li t3, 5
               bne s2, t3, case4_vectored
@@ -437,9 +291,6 @@ RVTEST_BEGIN
               li t1, 32
               csrrc t6, mip, t1
 
-
-
-
           case4_vectored:
               li t3, 4
               bne s2, t3, case3_vectored
@@ -452,7 +303,6 @@ RVTEST_BEGIN
               li t0, 512
               csrrc t6, mip, t0
 
-
           case3_vectored:
               li t3, 3
               bne s2, t3, case3_vectored
@@ -462,7 +312,6 @@ RVTEST_BEGIN
               csrrsi t6, sstatus, 2
               RVTEST_GOTO_MMODE
               csrrci t6, mip, 2
-
 
           case2_vectored:
               li t3, 2
@@ -476,9 +325,6 @@ RVTEST_BEGIN
               //jal reset_mtimecmp
               RVMODEL_CLR_MTIMER_INT
 
-
-
-
           case1_vectored:
               li t3, 1
               bne s2, t3, case0_vectored      # if s2 == 1, trigger external interrupt
@@ -490,9 +336,6 @@ RVTEST_BEGIN
               RVTEST_GOTO_MMODE
               //jal reset_external_interrupts
               RVMODEL_CLR_MEXT_INT
-
-
-
 
           case0_vectored:
               li t3, 0
@@ -506,35 +349,19 @@ RVTEST_BEGIN
               //jal reset_msoftware_interrupt
               RVMODEL_CLR_MSW_INT
 
-
-
-
           case_end_vectored:
               addi s2, s2, -1
               bge s2, zero, for_mip
 
-
-
-
       LREG ra, 0(sp)
       addi sp, sp, 8
 
-
-
-
       ret
-
-
-
-
-
-
 
 
   test_end:
       li a0, 4            # argument to finish program
       ecall               # system call to finish program
-
 
 
 

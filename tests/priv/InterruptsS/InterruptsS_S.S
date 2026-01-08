@@ -9,18 +9,6 @@
 ///////////////////////////////////////////
 
 
-
-
-//#include "model_test.h"
-
-
-
-
-//#include "arch_test.h"
-
-
-
-
 ##### START_TEST_CONFIG #####
 # REQUIRED_EXTENSIONS: [I, S, Zicsr]
 # MARCH: rv${XLEN}i_zicsr
@@ -28,37 +16,18 @@
 ##### END_TEST_CONFIG #####
 
 
-
-
 #define rvtest_mtrap_routine
 #define rvtest_strap_routine
-
-
-
 
 #define SIGUPD_COUNT 402
 #define TEST_FILE "InterruptsS_S.S"
 #include "riscv_arch_test.h"
 
 
-
-
-
-
 RVTEST_BEGIN
-
-
-
-
   csrw satp, zero                                                         // write satp with all zeros (bare mode)
-
-
-  //la sp, topofstack
   la sp, scratch
-  //jal reset_mtimecmp
   RVMODEL_CLR_MTIMER_INT
-
-
 
 
 /*
@@ -1677,14 +1646,9 @@ RVTEST_BEGIN
 
 
   cp_wfi_timeout_s:
-
-
       li a0, 16           # use a0 as bitfield
       li a1, 3            # use a3 as index variable for priv mode
       RVTEST_GOTO_MMODE   # start test in M-mode to control CSRs
-
-
-
 
       1:
       addi a0, a0, -1
@@ -1695,7 +1659,6 @@ RVTEST_BEGIN
       li t0, 8
       csrrs t6, mstatus, t0
 
-
       2:
       li t0, 2
       csrrc t6, mstatus, t0
@@ -1704,16 +1667,12 @@ RVTEST_BEGIN
       li t0, 2
       csrrs t6, mstatus, t0
 
-
       3:
       li t1, -1
       csrrc t6, mideleg, t1
       andi t0, a0, 2
       beqz t0, 4f                         # use bit 1 to toggle mideleg = 0s/1s
       csrrs t6, mideleg, t1
-
-
-
 
       4:
       li t1, 128
@@ -1722,9 +1681,6 @@ RVTEST_BEGIN
       beqz t0, 5f                         # use bit 0 to toggle mie.MTIE
       csrrs t6, mie, t1
 
-
-
-
       5:
       li t1, 1
       slli t1, t1, 21
@@ -1732,17 +1688,11 @@ RVTEST_BEGIN
       //jal reset_mtimecmp                  # set mtimecmp = MAX so timer interrupt will never trigger
       RVMODEL_CLR_MTIMER_INT
 
-
-
-
       RVTEST_GOTO_LOWER_MODE Smode        # run wfi in S-mode by default
       addi a1, a1, -1
       li t0, 1
       bne a1, t0, 6f                      # if a1 = 1, run in U-mode instead
       RVTEST_GOTO_LOWER_MODE Umode
-
-
-
 
       6:
       wfi                 # wfi instruction, expect timeout trap
@@ -1760,53 +1710,26 @@ RVTEST_BEGIN
   ///////////////////////////////
   // helper functions
   ///////////////////////////////
-
-
-
-
-  //#include "trickbox.S"
-
-
-
-
   cross_interrupts_s_EP:
       // helper function for crossing mie.MEIE/SEIE/M/STIE/M/SSIE with mip.M/SEIP/MTIP/MSIP in Interrupts tests (enables and pending)
       li s0, 5                # iterate through setting mie.MEIE (5), SEIE (4), MTIE (3), STIE (2), MSIE (1), or SSIE (0)
 
-
-
-
       addi sp, sp, -8         # save ra before next function call
       SREG ra, 0(sp)
 
-
-
-
       for_mie_s:
-
-
           slli t3, s0, 1      # setting mie.M/SEIE, M/STIE, or M/SSIE based on s0 value
           li t4, 2
           sll t4, t4, t3      # put a 1 in bit (1+(2*s0))
           csrrw t6, mie, t4   # set enable for interrupt type of interest, clear all others
 
-
           jal raise_interrupts_s
-
 
           addi s0, s0, -1
           bge s0, zero, for_mie_s # iterate through interrupt types to be enabled
 
-
-
-
-
-
       LREG ra, 0(sp)              # restore ra
       addi sp, sp, 8
-
-
-
 
       ret
 
@@ -1815,33 +1738,18 @@ RVTEST_BEGIN
 
   raise_interrupts_s:
       // raises each of mip.M/SEIP/M/SSIP/M/STIP once in sequence
-
-
-
-
       addi sp, sp, -16     # store return address to stack
       csrr t6, mie         # save mie on stack because trap handler may reset it
       SREG t6, 8(sp)
       SREG ra, 0(sp)
 
-
-
-
       li s2, 5            # RVTEST_GOTO_LOWER_MODE macro wipes s1 so use s2 instead
-
-
-
-
       for_mip_s:
 
 
           # based on s2 value, set mip.MEIP (5), SEIP (4), MTIP (3), STIP (2), MSIP (1), or SSIP (0)
           # includes clearing mip in case interrupt is not triggered
           # To trigger interrupts in S-mode, raise mstatus.SIE and switch to S-mode
-
-
-
-
           for_mip_s_meip:
               li t3, 5
               bne s2, t3, for_mip_s_seip      # if s2 == 5, trigger mexternal interrupt
@@ -1856,9 +1764,6 @@ RVTEST_BEGIN
               csrc mstatus, t0                # clear mstatus.SIE
               //jal reset_external_interrupts
               RVMODEL_CLR_MEXT_INT
-
-
-
 
           for_mip_s_seip:
               li t3, 4
@@ -1891,9 +1796,6 @@ RVTEST_BEGIN
               //jal reset_mtimecmp
               RVMODEL_CLR_MTIMER_INT
 
-
-
-
           for_mip_s_stip:
               li t3, 2
               bne s2, t3, for_mip_s_msip      # if s2 == 2, trigger stimer interrupt
@@ -1908,9 +1810,6 @@ RVTEST_BEGIN
               csrc mstatus, t0                # clear mstatus.SIE
               li t1, 32
               csrrc t6, mip, t1
-
-
-
 
           for_mip_s_msip:
               li t3, 1
@@ -1927,9 +1826,6 @@ RVTEST_BEGIN
               //jal reset_msoftware_interrupt
               RVMODEL_CLR_MSW_INT
 
-
-
-
           for_mip_s_ssip:
               li t3, 0
               bne s2, t3, for_mip_s_end      # if s2 = 0, trigger ssoftware interrupt
@@ -1944,41 +1840,21 @@ RVTEST_BEGIN
               li t0, 2
               csrrc t6, mip, t0
 
-
           for_mip_s_end:
               LREG t6, 8(sp)                  # restore mie value for next test
               csrw mie, t6                    # restore mie value for next test
               addi s2, s2, -1                 # decrement loop counter
               bgez s2, for_mip_s
 
-
-
-
       LREG ra, 0(sp)      # restore return address from stack
       addi sp, sp, 16
 
-
-
-
       ret
-
-
-
-
-
-
-
-
-
-
 
 
   test_end:
       li a0, 4            # argument to finish program
       ecall               # system call to finish program
-
-
-
 
 
 
