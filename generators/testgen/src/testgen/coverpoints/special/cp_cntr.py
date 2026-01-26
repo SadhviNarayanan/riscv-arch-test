@@ -7,9 +7,9 @@
 
 """cp_cntr coverpoint generator."""
 
-from testgen.coverpoints.coverpoints import add_coverpoint_generator
-from testgen.data.test_data import TestData
-from testgen.utils.common import write_sigupd
+from testgen.asm.helpers import write_sigupd
+from testgen.coverpoints.registry import add_coverpoint_generator
+from testgen.data.state import TestData
 
 
 @add_coverpoint_generator("cp_cntr")
@@ -23,14 +23,27 @@ def make_cntr(instr_name: str, instr_type: str, coverpoint: str, test_data: Test
     if coverpoint == "cp_cntr":
         test_lines.extend(
             [
-                gen_cntr_test("cycle", r1, r2, test_data),
-                gen_cntr_test("time", r1, r2, test_data),
-                gen_cntr_test("instret", r1, r2, test_data),
+                gen_cntr_test(instr_name, "cycle", r1, r2, test_data),
+                "#if TIME_CSR_IMPLEMENTED\n",
+                gen_cntr_test(instr_name, "time", r1, r2, test_data),
+                "#endif\n",
+                gen_cntr_test(instr_name, "instret", r1, r2, test_data),
+                "#if __riscv_xlen == 32\n",
+                gen_cntr_test(instr_name, "cycleh", r1, r2, test_data),
+                "#if TIME_CSR_IMPLEMENTED\n",
+                gen_cntr_test(instr_name, "timeh", r1, r2, test_data),
+                "#endif\n",
+                gen_cntr_test(instr_name, "instreth", r1, r2, test_data),
+                "#endif\n",
             ]
         )
     elif coverpoint == "cp_cntr_hpm":
         for hpm in range(3, 32):  # hpmcounter3 through hpmcounter31
-            test_lines.append(gen_cntr_test(f"hpmcounter{hpm}", r1, r2, test_data))
+            test_lines.append(gen_cntr_test(instr_name, f"hpmcounter{hpm}", r1, r2, test_data))
+        test_lines.append("#if __riscv_xlen == 32\n")
+        for hpm in range(3, 32):  # hpmcounter3h through hpmcounter31h
+            test_lines.append(gen_cntr_test(instr_name, f"hpmcounter{hpm}h", r1, r2, test_data))
+        test_lines.append("#endif\n")
     else:
         raise ValueError(f"Unknown cp_cntr coverpoint variant: {coverpoint} for {instr_name}")
 
@@ -39,23 +52,28 @@ def make_cntr(instr_name: str, instr_type: str, coverpoint: str, test_data: Test
     return test_lines
 
 
-def gen_cntr_test(cntr: str, r1: int, r2: int, test_data: TestData) -> str:
+def gen_cntr_test(instr_name: str, cntr: str, r1: int, r2: int, test_data: TestData) -> str:
     """Generate counter test snippet."""
     mindiff = 1 if cntr in ["instret", "cycle"] else 0  # instret and cycle increment quickly; others may not
+    if cntr != "instret" and not cntr.endswith("h"):
+        slt = f"slti x{r1}, x{r1}, {mindiff} # set fail code if difference < {mindiff}"
+    else:
+        slt = ""  # for minstret, the difference should be exact.  High counters should be exactly zero.
     lines = [
         test_data.add_testcase("cp_cntr"),
         f"# Testcase: cp_cntr ({cntr})",
         "#  Read two consecutive times to check if counter increments",
-        f"csrr x{r1}, {cntr}",
-        "nop",
-        "nop",
-        "nop",
-        "nop",
-        "nop",
-        "nop",
-        f"csrr x{r2}, {cntr}",
+        f"{instr_name} x{r1}, {cntr}, x0",
+        f"addi x{r2}, x{r1}, 1 # delay a bit",
+        f"addi x{r2}, x{r2}, 1 # delay a bit",
+        f"addi x{r2}, x{r2}, 1 # delay a bit",
+        f"addi x{r2}, x{r2}, 1 # delay a bit",
+        f"addi x{r2}, x{r2}, 1 # delay a bit",
+        f"addi x{r2}, x{r2}, 1 # delay a bit",
+        f"{instr_name} x{r2}, {cntr}, x0",
+        f"{instr_name} x{r2}, {cntr}, x0 # read again to increase delay a bit more",
         f"sub x{r1}, x{r2}, x{r1} # compute difference",
-        f"sltiu x{r1}, x{r1}, {mindiff} # set fail code if difference < {mindiff}",
+        f"{slt}",
         write_sigupd(r1, test_data, "int"),  # record difference as signature
         "",
     ]

@@ -8,7 +8,7 @@ The ACT4 Framework requires a UDB configuration file specifying the extensions a
 
 RISC-V is highly configurable, such as whether misaligned accesses are allowed or how many PMP registers are implemented. Therefore, the expected results of the tests differ based on the configuration of the DUT. The ACT4 Framework selects the appropriate tests to compile based on the capabilities of the DUT. It then uses the [Sail reference model](https://github.com/riscv/sail-riscv), configured to match the DUT, to compute the expected results of each test. These results are then compiled into the final self-checking ELFs.
 
-The Architectural Certification Tests are described in full detail in the [Certification Test Plan](https://riscv-non-isa.github.io/riscv-arch-test) (CTP). The ACT4 Framework principles of operation are detailed in [LINK COMING SOON]. An ACT Developer's Guide for adding more tests and coverpoints is in [LINK COMING SOON].
+The Architectural Certification Tests are described in full detail in the [Certification Test Plan](https://riscv-non-isa.github.io/riscv-arch-test) (CTP). The ACT4 Framework principles of operation are detailed in [LINK COMING SOON]. For details on adding more tests and coverpoints, see the [ACT Developer's Guide](./docs/DeveloperGuide.md).
 
 ## Table of Contents
 
@@ -66,7 +66,9 @@ For more details on uv and alternate installation methods, see the [uv installat
 
 The ACT framework is compatible with GCC or LLVM. This guide uses GCC, but if you prefer LLVM you just need to set the path for the compiler appropriately when [creating your config file](#act-framework-configuration-file).
 
-> **Note**: The toolchain installation will take significant time (up to several hours depending on your system).
+> [!NOTE]
+>
+> The toolchain installation will take significant time (up to several hours depending on your system).
 
 To install `riscv64-unknown-elf-gcc`:
 
@@ -86,7 +88,7 @@ sudo dnf install autoconf automake python3 libmpc-devel mpfr-devel gmp-devel \
 git clone https://github.com/riscv/riscv-gnu-toolchain
 cd riscv-gnu-toolchain
 ./configure --prefix=</path/to/install> --with-multilib-generator="rv32e-ilp32e--;rv32i-ilp32--;rv32im-ilp32--;rv32iac-ilp32--;rv32imac-ilp32--;rv32imafc-ilp32f--;rv32imafdc-ilp32d--;rv64i-lp64--;rv64ic-lp64--;rv64iac-lp64--;rv64imac-lp64--;rv64imafdc-lp64d--;rv64im-lp64--;"
-sudo make  # sudo may required depending on the selected `prefix`
+sudo make  # sudo may be required depending on the selected `prefix`
 ```
 
 **Important**: Add the toolchain to your `PATH` by adding this line to your `~/.bashrc`:
@@ -103,7 +105,7 @@ riscv64-unknown-elf-gcc --version
 
 For more information or if you have issues installing the RISC-V toolchain, refer to the [riscv-gnu-toolchain README](https://github.com/riscv-collab/riscv-gnu-toolchain).
 
-#### 4. RISC-V Sail Golden Reference Model
+#### 4. RISC-V Sail Reference Model
 
 The ACTs use the RISC-V Sail model to generate expected results. It is currently compatible with version 0.9 of the model.
 
@@ -209,7 +211,12 @@ The ACT Framework uses a selection of assembly macros to run DUT-specific code t
 - `RVMODEL_DATA_SECTION`
 - `RVMODEL_BOOT`
 
-**Interrupt Macros**: Can be left blank if interrupts are not supported. `RVMODEL_WRITE_GEIP` should be blank if hypervisor is not supported.
+**Timer Macros**: Can be left blank if `mtime` is not supported..
+
+- `RVMODEL_SET_MTIME`
+- `RVMODEL_SET_MTIMEH` (RV32 only)
+
+**Interrupt Macros**: Can be left blank if interrupts are not supported.
 
 - `RVMODEL_SET_MEXT_INT`
 - `RVMODEL_CLR_MEXT_INT`
@@ -225,7 +232,6 @@ The ACT Framework uses a selection of assembly macros to run DUT-specific code t
 - `RVMODEL_SET_STIMER_INT_SOON`
 - `RVMODEL_SET_SSW_INT`
 - `RVMODEL_CLR_SSW_INT`
-- `RVMODEL_WRITE_GEIP(_R)`
 
 Complete examples are available for an example DUT ([config/duts/cvw/cvw-rv64gc/model_test.h](./config/duts/cvw/cvw-rv64gc/model_test.h)) and for the RISC-V Sail reference model ([config/ref/sail-rv64gc/model_test.h](./config/ref/sail-rv64gc/model_test.h)).
 
@@ -273,6 +279,10 @@ CONFIG_FILES=config/duts/<your_config_here>/test_config.yaml make --jobs $(nproc
 This will create all of the ELFs that apply to your DUT (based on the provided UDB configuration) in the `work/<config_name>/elfs` directory. These ELFs have the expected results compiled into them and use the provided macros and linker script.
 
 Note that the ACT framework first compiles signature-generating versions of the tests (with a .sig.elf suffix) in the `work/<config_name>/build` or `work/common/build` directory, then simulates these tests on the Sail reference model and saves the signature into a `.sig` file. It then recompiles the tests with the correct results included to enable self-checking, placing the executable in the elfs directory mentioned above. The build directory contents are only of interest when troubleshooting during test development. See [LINK COMING SOON] for details.
+
+> [!NOTE]
+>
+> To generate the assembly tests and coverpoints without compiling or running them, run `make tests`. This only requires `make` and `uv` to be installed.
 
 ### Running Certification Tests
 

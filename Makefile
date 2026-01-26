@@ -39,10 +39,10 @@ STAMP_DIR := $(WORKDIR)/stamps
 # Check if UV is installed and set UV variable
 UV := $(shell command -v uv 2> /dev/null)
 ifneq ($(UV),)
-		UV_RUN := $(UV) run
+  UV_RUN := $(UV) run
 else
-		UV_RUN :=
-		$(warning "Warning: 'uv' command not found. Running scripts without UV, but there may be dependency issues.")
+  UV_RUN :=
+  $(warning "Warning: 'uv' command not found. Running scripts without UV, but there may be dependency issues.")
 endif
 
 .DEFAULT_GOAL := elfs
@@ -55,7 +55,7 @@ elfs: generate-makefiles-dut Makefile
 .PHONY: generate-makefiles-dut
 generate-makefiles-dut: # too many dependencies to track; always regenerate Makefile
 	$(MAKE) tests
-	$(UV_RUN) act $(CONFIG_FILES) --workdir $(WORKDIR) --test-dir $(TESTDIR) $(if $(EXTENSIONS),--extensions $(EXTENSIONS)) $(if $(DEBUG),--debug)
+	$(UV_RUN) act $(CONFIG_FILES) --workdir $(WORKDIR) --test-dir $(TESTDIR) $(if $(EXTENSIONS),--extensions $(EXTENSIONS)) $(if $(EXCLUDE_EXTENSIONS),--exclude $(EXCLUDE_EXTENSIONS)) $(if $(DEBUG),--debug)
 
 .PHONY: clean
 clean: clean-tests clean-ref
@@ -71,7 +71,7 @@ $(STAMP_DIR)/covergroupgen.stamp: $(COVERGROUPGEN_DEPS) $(TESTPLANS) Makefile | 
 .PHONY: testgen
 testgen: $(STAMP_DIR)/testgen.stamp
 $(STAMP_DIR)/testgen.stamp: $(TESTGEN_DEPS) $(TESTPLANS) Makefile | $(STAMP_DIR)
-	$(UV_RUN) testgen testplans -o tests $(if $(EXTENSIONS),--extensions $(EXTENSIONS))
+	$(UV_RUN) testgen testplans -o tests $(if $(EXTENSIONS),--extensions $(EXTENSIONS)) $(if $(EXCLUDE_EXTENSIONS),--exclude $(EXCLUDE_EXTENSIONS))
 	@touch $@
 
 .PHONY: vector-testgen
@@ -107,7 +107,7 @@ $(PRIVHEADERSDIR) $(STAMP_DIR):
 .PHONY: generate-makefiles-ref
 generate-makefiles-ref: # too many dependencies to track; always regenerate Makefile
 	$(MAKE) tests
-	$(UV_RUN) act $(REF_CONFIG_FILES) --workdir $(WORKDIR_REF) --test-dir $(TESTDIR) --coverage $(if $(EXTENSIONS),--extensions $(EXTENSIONS)) $(if $(DEBUG),--debug)
+	$(UV_RUN) act $(REF_CONFIG_FILES) --workdir $(WORKDIR_REF) --test-dir $(TESTDIR) --coverage $(if $(EXTENSIONS),--extensions $(EXTENSIONS)) $(if $(EXCLUDE_EXTENSIONS),--exclude $(EXCLUDE_EXTENSIONS)) $(if $(DEBUG),--debug)
 
 .PHONY: coverage
 coverage: generate-makefiles-ref Makefile
