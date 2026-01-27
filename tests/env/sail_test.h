@@ -101,15 +101,65 @@
 
 #define RVMODEL_CLR_MEXT_INT
 
-#define RVMODEL_SET_MTIMER_INT
+#define RVMODEL_SET_MTIMER_INT \
+  la t0, MTIME;                \
+  la t1, MTIMECMP;             \
+  LREG t2, 0(t0);              \
+  SREG t2, 0(t1);              \
+  nop;                         \
+#ifdef __riscv_xlen \
+  #if __riscv_xlen == 32 \
+      lw t2, 4(t0);            \
+      sw t2, 4(t1);            \
+      nop;                     \
+  #endif \
+#else \
+  ERROR: __riscv_xlen not defined; \
+#endif
 
-#define RVMODEL_CLR_MTIMER_INT
+#define RVMODEL_CLR_MTIMER_INT \
+  li t0, -1;                    \
+  la t2, MTIMECMP;              \
+  SREG t0, 0(t2);               \
+#ifdef __riscv_xlen \
+  #if __riscv_xlen == 32 \
+      sw t0, 4(t2);             \
+  #endif \
+#else \
+  ERROR: __riscv_xlen not defined; \
+#endif
 
 #define RVMODEL_SET_MTIMER_INT_SOON
+la t0, MTIME; \
+la t4, MTIMECMP; \
+#ifdef __riscv_xlen \
+  #if __riscv_xlen == 64 \
+      ld t0, 0(t0); \
+      addi t0, t0, 0x100; \
+      sd t0, 0(t4); \
+  #elif __riscv_xlen == 32 \
+      lw t1, 0(t0); \
+      lw t2, 4(t0); \
+      addi t3, t1, 0x100; \
+      bgtu t1, t3, 1f; \
+      j 2f; \
+  1: addi t2, t2, 1; \
+  2: sw t3, 0(t4); \
+      sw t2, 4(t4); \
+  #endif \
+#else \
+  ERROR: __riscv_xlen not defined; \
+#endif
 
-#define RVMODEL_SET_MSW_INT
+#define RVMODEL_SET_MSW_INT \
+  li t1, 1;                 \
+  li t2, MSIP;              \
+  sw t1, 0(t2);
 
-#define RVMODEL_CLR_MSW_INT
+
+#define RVMODEL_CLR_MSW_INT \
+  li t2, MSIP;              \
+  sw zero, 0(t2);
 
 ##### Supervisor Interrupts #####
 
