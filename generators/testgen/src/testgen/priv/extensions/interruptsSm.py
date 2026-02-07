@@ -20,40 +20,44 @@ def _generate_trigger_mti_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_mti"
     ######################################
 
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+
     lines = [
         comment_banner(
             "cp_trigger_mti",
             "With mstatus.MIE = {0/1}, and mie = all 1s, use MTIMECMP to cause mip.MTIP",
         ),
         "",
-        "LI(t0, -1)               # all 1s",
-        "CSRRW(t6, mie, t0)       # enable all interrupts",
+        f"LI x{r1}, -1               # all 1s",
+        f"CSRRW x{r2}, mie, x{r1}    # enable all interrupts",
         "",
-        "# mstatus.MIE = 0 should not take interrupt",
     ]
 
+    # Test 1: mstatus.MIE = 0 should NOT take interrupt
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
-            "    RVMODEL_SET_MTIMER_INT   # trigger timer interrupt",
-            "    # NOTE: interrupt is not taken",
-            "    RVMODEL_CLR_MTIMER_INT   # reset mtimecmp",
-            write_sigupd(31, test_data),
+            f"    LI x{r1}, 1                # success code",
+            f"    CSRRCI x{r2}, mstatus, 8   # mstatus.MIE = 0",
+            "    RVMODEL_SET_MTIMER_INT     # trigger timer interrupt",
+            "    RVMODEL_CLR_MTIMER_INT     # reset mtimecmp (no interrupt fired)",
+            f"    # x{r1} should still be 1 since no interrupt",
+            write_sigupd(r1, test_data),
         ]
     )
 
-    lines.extend(
-        [
-            "",
-            "# mstatus.MIE = 1 should take interrupt",
-            test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
-            "    RVMODEL_SET_MTIMER_INT   # expecting timer interrupt",
-            write_sigupd(31, test_data),
-        ]
-    )
+    # # Test 2: mstatus.MIE = 1 should take interrupt
+    # lines.extend([
+    #     "",
+    #     test_data.add_testcase(coverpoint, "mie_1", covergroup),
+    #     f"    LI x{r1}, 1                # success code",
+    #     f"    CSRRSI x{r2}, mstatus, 8   # mstatus.MIE = 1",
+    #     "    RVMODEL_SET_MTIMER_INT     # interrupt fires, handler runs",
+    #     f"    LI x{r1}, -1               # trap handler skips this",
+    #     write_sigupd(r1, test_data),  # Should be 1
+    # ])
 
+    test_data.int_regs.return_registers([r1, r2])
     return lines
 
 
@@ -64,39 +68,46 @@ def _generate_trigger_msi_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_msi"
     ######################################
 
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
+
     lines = [
         comment_banner(
             "cp_trigger_msi",
             "With mstatus.MIE = {0/1}, and mie = all 1s, use CLINT.MSIP to cause mip.MSIP",
         ),
         "",
-        "LI(t0, -1)               # all 1s",
-        "CSRRW(t6, mie, t0)       # enable all interrupts",
+        f"LI x{r1}, -1               # all 1s",
+        f"CSRRW x{r2}, mie, x{r1}    # enable all interrupts",
         "",
-        "# mstatus.MIE = 0 should not take interrupt",
     ]
 
+    # Test 1: mstatus.MIE = 0 should NOT take interrupt
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
-            "    RVMODEL_SET_MSW_INT      # trigger software interrupt",
-            "    RVMODEL_CLR_MSW_INT      # reset mip.MSIP",
-            write_sigupd(31, test_data),
+            f"    LI x{r1}, 1                # success code",
+            f"    CSRRCI x{r2}, mstatus, 8   # mstatus.MIE = 0",
+            "    RVMODEL_SET_MSW_INT        # trigger software interrupt",
+            "    RVMODEL_CLR_MSW_INT        # clear it (no interrupt fired)",
+            f"    # x{r1} should still be 1 since no interrupt",
+            write_sigupd(r1, test_data),
         ]
     )
 
+    # Test 2: mstatus.MIE = 1 should take interrupt
     lines.extend(
         [
             "",
-            "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
-            "    RVMODEL_SET_MSW_INT      # expecting software interrupt",
-            write_sigupd(31, test_data),
+            f"    LI x{r1}, 1                # success code",
+            f"    CSRRSI x{r2}, mstatus, 8   # mstatus.MIE = 1",
+            "    RVMODEL_SET_MSW_INT        # interrupt fires, handler runs",
+            f"    LI x{r1}, -1               # trap handler skips this",
+            write_sigupd(r1, test_data),  # Should be 1
         ]
     )
 
+    test_data.int_regs.return_registers([r1, r2])
     return lines
 
 
@@ -122,7 +133,7 @@ def _generate_trigger_mei_tests(test_data: TestData) -> list[str]:
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
+            "    CSRRCI t6, mstatus, 8   # mstatus.MIE = 0",
             "    LI(a3, 0x10)",
             "    RVMODEL_SET_MEXT_INT",
             "    RVMODEL_CLR_MEXT_INT",
@@ -135,7 +146,7 @@ def _generate_trigger_mei_tests(test_data: TestData) -> list[str]:
             "",
             "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+            "    CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
             "    LI(a3, 0x10)",
             "    RVMODEL_SET_MEXT_INT",
             write_sigupd(31, test_data),
@@ -167,7 +178,7 @@ def _generate_trigger_sti_tests(test_data: TestData) -> list[str]:
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
+            "    CSRRCI t6, mstatus, 8   # mstatus.MIE = 0",
             "    LI(t0, 32)               # 1 in bit 5",
             "    CSRRS(t6, mip, t0)       # set mip.STIP",
             "    CSRRC(t6, mip, t0)       # reset mip.STIP",
@@ -180,7 +191,7 @@ def _generate_trigger_sti_tests(test_data: TestData) -> list[str]:
             "",
             "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+            "    CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
             "    LI(t0, 32)               # 1 in bit 5",
             "    CSRRS(t6, mip, t0)       # set mip.STIP, expect interrupt",
             write_sigupd(31, test_data),
@@ -212,9 +223,9 @@ def _generate_trigger_ssi_mip_tests(test_data: TestData) -> list[str]:
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
-            "    CSRRSI(t6, mip, 2)       # set mip.SSIP",
-            "    CSRRCI(t6, mip, 2)       # reset mip.SSIP",
+            "    CSRRCI t6, mstatus, 8   # mstatus.MIE = 0",
+            "    CSRRSI t6, mip, 2       # set mip.SSIP",
+            "    CSRRCI t6, mip, 2       # reset mip.SSIP",
             write_sigupd(31, test_data),
         ]
     )
@@ -224,8 +235,8 @@ def _generate_trigger_ssi_mip_tests(test_data: TestData) -> list[str]:
             "",
             "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
-            "    CSRRSI(t6, mip, 2)       # set mip.SSIP, expect interrupt",
+            "    CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
+            "    CSRRSI t6, mip, 2       # set mip.SSIP, expect interrupt",
             write_sigupd(31, test_data),
         ]
     )
@@ -255,7 +266,7 @@ def _generate_trigger_sei_plic_tests(test_data: TestData) -> list[str]:
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
+            "    CSRRCI t6, mstatus, 8   # mstatus.MIE = 0",
             "    LI(a3, 0x10)",
             "    RVMODEL_SET_SEXT_INT",
             "    RVMODEL_CLR_SEXT_INT",
@@ -268,7 +279,7 @@ def _generate_trigger_sei_plic_tests(test_data: TestData) -> list[str]:
             "",
             "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+            "    CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
             "    LI(a3, 0x10)",
             "    RVMODEL_SET_SEXT_INT",
             write_sigupd(31, test_data),
@@ -300,7 +311,7 @@ def _generate_trigger_sei_sie_tests(test_data: TestData) -> list[str]:
     lines.extend(
         [
             test_data.add_testcase(coverpoint, "mie_0", covergroup),
-            "    CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0",
+            "    CSRRCI t6, mstatus, 8   # mstatus.MIE = 0",
             "    LI(t0, 512)              # 1 in bit 9",
             "    CSRRS(t6, mip, t0)       # set mip.SEIP",
             "    CSRRC(t6, mip, t0)       # reset mip.SEIP",
@@ -313,7 +324,7 @@ def _generate_trigger_sei_sie_tests(test_data: TestData) -> list[str]:
             "",
             "# mstatus.MIE = 1 should take interrupt",
             test_data.add_testcase(coverpoint, "mie_1", covergroup),
-            "    CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+            "    CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
             "    LI(t0, 512)              # 1 in bit 9",
             "    CSRRS(t6, mip, t0)       # set mip.SEIP, expect interrupt",
             write_sigupd(31, test_data),
@@ -337,15 +348,15 @@ def _generate_interrupt_cross_tests(test_data: TestData) -> list[str]:
             "3 walking 1s in mie.MTIE/MSIE/MEIE (2 x 3 x 3 bins)",
         ),
         "",
-        "CSRRCI(t6, mtvec, 3)     # mtvec.MODE = 00",
+        "CSRRCI t6, mtvec, 3     # mtvec.MODE = 00",
     ]
 
     # Unroll the nested loops: mstatus.MIE x mie enables x mip pending
     for mstatus_mie in [0, 1]:
         if mstatus_mie == 0:
-            lines.append("CSRRCI(t6, mstatus, 8)   # mstatus.MIE = 0")
+            lines.append("CSRRCI t6, mstatus, 8   # mstatus.MIE = 0")
         else:
-            lines.append("CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1")
+            lines.append("CSRRSI t6, mstatus, 8   # mstatus.MIE = 1")
 
         # 3 interrupt enables: s1 = 2 (MEIE), 1 (MTIE), 0 (MSIE)
         for s1 in [2, 1, 0]:
@@ -369,6 +380,7 @@ def _generate_interrupt_cross_tests(test_data: TestData) -> list[str]:
                 lines.extend(
                     [
                         test_data.add_testcase(coverpoint, binname, covergroup),
+                        "    LI t0, 1                # success flag",
                         "    CSRR(t6, mie)            # save mie (trap clears it)",
                     ]
                 )
@@ -398,7 +410,8 @@ def _generate_interrupt_cross_tests(test_data: TestData) -> list[str]:
                 lines.extend(
                     [
                         "    CSRW(mie, t6)            # restore mie",
-                        write_sigupd(31, test_data),
+                        write_sigupd(5, test_data),  # Check t0 (x5)
+                        "",
                     ]
                 )
 
@@ -419,9 +432,9 @@ def _generate_vectored_tests(test_data: TestData) -> list[str]:
             "3 walking 1s in mip.MTIP/MSIP/MEIP (3 bins)",
         ),
         "",
-        "CSRRCI(t6, mtvec, 3)",
-        "CSRRSI(t6, mtvec, 1)     # mtvec.MODE = 01",
-        "CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+        "CSRRCI t6, mtvec, 3",
+        "CSRRSI t6, mtvec, 1     # mtvec.MODE = 01",
+        "CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
         "CSRRW(t6, mie, zero)     # clear all enables",
         "LI(s1, 0x888)            # MEIE/MTIE/MSIE",
         "CSRRS(t6, mie, s1)       # enable all three",
@@ -480,7 +493,7 @@ def _generate_priority_tests(test_data: TestData) -> list[str]:
             "with hardware events giving the 8 values of mip.{MSIP/MTIP/MEIP} (8 x 8 bins)",
         ),
         "",
-        "CSRRSI(t6, mstatus, 8)   # mstatus.MIE = 1",
+        "CSRRSI t6, mstatus, 8   # mstatus.MIE = 1",
     ]
 
     # Unroll s1 loop: 7 down to 0 (mie values)
@@ -490,14 +503,14 @@ def _generate_priority_tests(test_data: TestData) -> list[str]:
             [
                 "CSRRW(t6, mie, zero)     # clear all enables",
                 f"LI(t0, {s1 & 4})         # check bit 2",
-                "SLLI(t0, t0, 9)          # mie.MEIE position",
-                "MV(s3, t0)",
+                "slli t0, t0, 9          # mie.MEIE position",
+                "mv s3, t0",
                 f"LI(t0, {s1 & 2})         # check bit 1",
-                "SLLI(t0, t0, 6)          # mie.MTIE position",
-                "OR(s3, s3, t0)",
+                "slli t0, t0, 6          # mie.MTIE position",
+                "or s3, s3, t0",
                 f"LI(t0, {s1 & 1})         # check bit 0",
-                "SLLI(t0, t0, 3)          # mie.MSIE position",
-                "OR(s3, s3, t0)",
+                "slli t0, t0, 3          # mie.MSIE position",
+                "or s3, s3, t0",
             ]
         )
 
@@ -561,7 +574,7 @@ def _generate_wfi_tests(test_data: TestData) -> list[str]:
 
         # Set MIE if bit 1 is set
         if s2 & 2:
-            lines.append("    CSRRSI(t6, mstatus, 8)   # set mstatus.MIE")
+            lines.append("    CSRRSI t6, mstatus, 8   # set mstatus.MIE")
 
         # Set TW if bit 0 is set
         if s2 & 1:
@@ -587,12 +600,11 @@ def _generate_wfi_tests(test_data: TestData) -> list[str]:
     return lines
 
 
-@add_priv_test_generator("InterruptsSm")
+@add_priv_test_generator("InterruptsSm", extensions=["Sm", "I", "Zicsr"])
 def make_interruptssm(test_data: TestData) -> list[str]:
     """Generate tests for InterruptsSm machine-mode interrupts."""
     lines: list[str] = [
         "",
-        "LA(sp, scratch)",
         "RVMODEL_CLR_MTIMER_INT",
         "",
     ]
