@@ -20,7 +20,7 @@ def _generate_trigger_mti_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_mti"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -70,7 +70,7 @@ def _generate_trigger_msi_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_msi"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -120,7 +120,7 @@ def _generate_trigger_mei_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_mei"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -169,7 +169,7 @@ def _generate_trigger_sti_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_sti"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -220,7 +220,7 @@ def _generate_trigger_ssi_mip_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_ssi_mip"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -269,7 +269,7 @@ def _generate_trigger_sei_plic_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_sei_plic"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -318,7 +318,7 @@ def _generate_trigger_sei_sie_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_trigger_sei_sie"
     ######################################
 
-    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1, r2 = test_data.int_regs.get_registers(2, exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -369,7 +369,7 @@ def _generate_interrupt_cross_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_interrupts"
     ######################################
 
-    r1 = test_data.int_regs.get_register(exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1 = test_data.int_regs.get_register(exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -443,7 +443,7 @@ def _generate_vectored_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_vectored"
     ######################################
 
-    r1 = test_data.int_regs.get_register(exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1 = test_data.int_regs.get_register(exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -498,7 +498,7 @@ def _generate_priority_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_priority"
     ######################################
 
-    r1 = test_data.int_regs.get_register(exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1 = test_data.int_regs.get_register(exclude_regs=[0])
 
     lines = [
         comment_banner(
@@ -574,7 +574,7 @@ def _generate_wfi_tests(test_data: TestData) -> list[str]:
     coverpoint = "cp_wfi"
     ######################################
 
-    r1 = test_data.int_regs.get_register(exclude_regs=[0, 2, 4, 5, 6, 7, 28, 29])
+    r1 = test_data.int_regs.get_register(exclude_regs=[0])
 
     lines = [
         comment_banner(
